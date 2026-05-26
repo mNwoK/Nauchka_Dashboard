@@ -11,7 +11,7 @@ REQUIRED_COLUMNS = {"Возраст", "Пол"}
 @st.cache_data
 def load_data(path=DATA_PATH) -> pd.DataFrame:
     if path.exists():
-        data = pd.read_csv(path)
+        data = pd.read_excel(path)
         missing_columns = REQUIRED_COLUMNS.difference(data.columns)
         if missing_columns:
             missing = ", ".join(sorted(missing_columns))
