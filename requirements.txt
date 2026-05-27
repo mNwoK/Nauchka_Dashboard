@@ -3,3 +3,6 @@ openpyxl
 pandas
 plotly
 streamlit
+
+catboost
+scikit-learn
