@@ -102,9 +102,10 @@ def show() -> None:
         st.button("В разработке...", disabled=True, key="school_stub")
 
     with col2:
-        st.markdown("### 📚 Обучение")
-        st.write("Повышение квалификации и переподготовка сотрудников")
-        st.button("В разработке...", disabled=True, key="training_stub")
+        st.markdown("### 📚 Образование")
+        st.write("Данные об образовании сотрудников")
+        if st.button("Открыть отчет", key="open_education"):
+            st.switch_page("pages/education.py")
 
     with col3:
         st.markdown("### ⏱️ Нагрузка")

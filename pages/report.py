@@ -141,7 +141,7 @@ def main() -> None:
 
     st.markdown("---")
 
-    tab1, tab2, tab3 = st.tabs(["Базовые", "Расширенные", "Образование"])
+    tab1, tab2, tab3 = st.tabs(["Базовые", "Расширенные", "Кадры"])
     with tab1:
         col1, col2 = st.columns(2)
         with col1:
@@ -187,6 +187,31 @@ def main() -> None:
         render_age_boxplot(filtered_df)
         st.dataframe(filtered_df, use_container_width=True)
 
+    with tab3:
+        st.markdown('### Список учителей со средним и высоким риском (2024)')
+        try:
+            preds = PredictionLoader.load_predictions(2024)
+            print(f"DEBUG: Loaded predictions for risk list, shape: {preds.shape}")
+            risk_df = preds[preds['risk_level'].isin(['Medium', 'High'])].copy()
+            print(f"DEBUG: Risk df count (Medium+High): {len(risk_df)}")
+            print(f'DEBUG: scoped_df length: {len(scoped_df)}')
+            # Merge with scoped_df to show additional columns (if same ids exist)
+            scoped_2024_for_merge = scoped_df[scoped_df['year'] == 2024]
+            print(f"DEBUG: Scoped 2024 df for merge count: {len(scoped_2024_for_merge)}")
+            merged = scoped_2024_for_merge.merge(risk_df, on='id', how='inner')
+            print(f"DEBUG: Merged df count: {len(merged)}")
+            # Show selected columns
+            cols = ['id', 'school_num', 'age', 'sex', 'attrition_probability', 'risk_level']
+            display_cols = [c for c in cols if c in merged.columns]
+            print(f"DEBUG: Display columns: {display_cols}")
+            st.dataframe(merged[display_cols].sort_values('attrition_probability', ascending=False),
+                         use_container_width=True)
+        except Exception as e:
+            error_msg = f'Нет предсказаний для отображения списка рискованных учителей: {str(e)}'
+            st.error(error_msg)
+            print(f"ERROR in risk list: {error_msg}")
+            print(traceback.format_exc())
+
         # Top features importance
         st.markdown("### Топ признаков, влияющих на риск увольнения")
         try:
@@ -202,31 +227,7 @@ def main() -> None:
             print(traceback.format_exc())
 
         # List of teachers with Medium and High risk
-        st.markdown('### Список учителей со средним и высоким риском (2024)')
-        try:
-            preds = PredictionLoader.load_predictions(2024)
-            print(f"DEBUG: Loaded predictions for risk list, shape: {preds.shape}")
-            risk_df = preds[preds['risk_level'].isin(['Medium','High'])].copy()
-            print(f"DEBUG: Risk df count (Medium+High): {len(risk_df)}")
-            print(f'DEBUG: scoped_df length: {len(scoped_df)}')
-            # Merge with scoped_df to show additional columns (if same ids exist)
-            scoped_2024_for_merge = scoped_df[scoped_df['year']==2024]
-            print(f"DEBUG: Scoped 2024 df for merge count: {len(scoped_2024_for_merge)}")
-            merged = scoped_2024_for_merge.merge(risk_df, on='id', how='inner')
-            print(f"DEBUG: Merged df count: {len(merged)}")
-            # Show selected columns
-            cols = ['id','school_num','age','sex','attrition_probability','risk_level']
-            display_cols = [c for c in cols if c in merged.columns]
-            print(f"DEBUG: Display columns: {display_cols}")
-            st.dataframe(merged[display_cols].sort_values('attrition_probability', ascending=False), use_container_width=True)
-        except Exception as e:
-            error_msg = f'Нет предсказаний для отображения списка рискованных учителей: {str(e)}'
-            st.error(error_msg)
-            print(f"ERROR in risk list: {error_msg}")
-            print(traceback.format_exc())
 
-    with tab3:
-        st.dataframe(scoped_education_df, use_container_width=True)
 
 
 if __name__ == "__main__":
